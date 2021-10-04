@@ -1,6 +1,7 @@
 ﻿use crate::Physical;
 use std::{f32::consts::FRAC_PI_2, time::Duration};
 
+#[derive(Clone, Copy, Debug)]
 pub struct Optimizer {
     angular_attenuation: f32,
     delta_speed: f32,
