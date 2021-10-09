@@ -102,8 +102,8 @@ impl ChassisModel {
 
     pub fn wheels_rad_to_delta(&self, d_rad: (f32, f32)) -> (f32, f32) {
         let Velocity { v: s, w: a } = self.wheels_to_velocity(Wheels {
-            left: self.wheel * d_rad.0,
-            right: self.wheel * d_rad.1,
+            left: d_rad.0,
+            right: d_rad.1,
         });
         (s, a)
     }
