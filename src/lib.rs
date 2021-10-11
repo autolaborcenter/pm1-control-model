@@ -1,7 +1,26 @@
-pub mod model;
-pub mod motor;
-pub mod optimizer;
-pub mod predictor;
+mod model;
+mod optimizer;
+
+pub use model::ChassisModel;
+pub use optimizer::Optimizer;
+
+#[cfg(feature = "odometry")]
+mod odometry;
+
+#[cfg(feature = "odometry")]
+pub use odometry::Odometry;
+
+#[cfg(feature = "motor")]
+mod motor;
+
+#[cfg(feature = "motor")]
+pub use motor::Motor;
+
+#[cfg(feature = "predict")]
+mod predictor;
+
+#[cfg(feature = "predict")]
+pub use predictor::Predictor;
 
 /// - `speed`: 机器人上各轮相对地面的最大线速度
 /// - `rudder`: 后轮转角

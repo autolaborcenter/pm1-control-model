@@ -1,5 +1,8 @@
 ﻿use crate::{Physical, Velocity, Wheels};
 
+#[cfg(feature = "odometry")]
+use crate::odometry::Odometry;
+
 /// 描述底盘结构并用于转换控制量空间的结构体。
 ///
 /// 除了描述结构必要的三个参数之外，此结构体还额外缓存了临界角。
@@ -100,11 +103,18 @@ impl ChassisModel {
         self.velocity_to_physical(self.wheels_to_velocity(wheels))
     }
 
-    pub fn wheels_rad_to_delta(&self, d_rad: (f32, f32)) -> (f32, f32) {
-        let Velocity { v: s, w: a } = self.wheels_to_velocity(Wheels {
-            left: d_rad.0,
-            right: d_rad.1,
-        });
-        (s, a)
+    #[cfg(feature = "odometry")]
+    pub fn velocity_to_odometry(&self, velocity: Velocity) -> Odometry {
+        velocity.into()
+    }
+
+    #[cfg(feature = "odometry")]
+    pub fn wheels_to_odometry(&self, wheels: Wheels) -> Odometry {
+        self.wheels_to_velocity(wheels).into()
+    }
+
+    #[cfg(feature = "odometry")]
+    pub fn physical_to_odometry(&self, physical: Physical) -> Odometry {
+        self.physical_to_velocity(physical).into()
     }
 }
