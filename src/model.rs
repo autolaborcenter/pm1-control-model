@@ -9,6 +9,7 @@ use crate::odometry::Odometry;
 /// 当后轮转角（的绝对值）大于临界角，后轮相对于地面的线速度将大于前轮，
 /// 此时，[`Physical`] 中 `speed` 表示后轮线速度；
 /// 否则，`speed` 表示较快的前轮的线速度。
+#[derive(Clone)]
 pub struct ChassisModel {
     pub width: f32,
     pub length: f32,
