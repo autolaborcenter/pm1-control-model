@@ -5,6 +5,9 @@ pub use model::ChassisModel;
 pub use optimizer::Optimizer;
 
 #[cfg(feature = "odometry")]
+pub extern crate nalgebra as na;
+
+#[cfg(feature = "odometry")]
 mod odometry;
 
 #[cfg(feature = "odometry")]
