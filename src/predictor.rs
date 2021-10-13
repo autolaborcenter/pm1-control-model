@@ -31,9 +31,7 @@ impl Iterator for Predictor {
                     f32::max(self.current.rudder - self.delta_rudder, self.target.rudder)
                 },
             };
-            Some(self.current)
-        } else {
-            None
         }
+        Some(self.current)
     }
 }
