@@ -28,6 +28,7 @@ pub use predictor::Predictor;
 /// - `speed`: 机器人上各轮相对地面的最大线速度
 /// - `rudder`: 后轮转角
 #[derive(Clone, Copy, PartialEq, Debug)]
+#[repr(C)]
 pub struct Physical {
     pub speed: f32,
     pub rudder: f32,
