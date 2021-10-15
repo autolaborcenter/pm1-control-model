@@ -1,4 +1,6 @@
-﻿use crate::Velocity;
+﻿use std::fmt::Display;
+
+use crate::Velocity;
 use nalgebra::{ArrayStorage, Complex, Isometry2, SVector, Translation, Unit, Vector2};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -56,5 +58,19 @@ impl std::ops::Add for Odometry {
         let mut copy = self.clone();
         copy += rhs;
         copy
+    }
+}
+
+impl Display for Odometry {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Odometry: {{ s: {}, a: {}, x: {}, y: {}, theta: {} }}",
+            self.s,
+            self.a,
+            self.pose.translation.vector[0],
+            self.pose.translation.vector[1],
+            self.pose.rotation.angle()
+        )
     }
 }
