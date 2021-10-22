@@ -1,5 +1,8 @@
 ﻿use crate::Physical;
-use std::{f32::consts::FRAC_PI_2, time::Duration};
+use std::{
+    f32::consts::{FRAC_PI_2, FRAC_PI_3, FRAC_PI_6},
+    time::Duration,
+};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Optimizer {
@@ -18,9 +21,12 @@ impl Optimizer {
     pub fn optimize_speed(&self, target: Physical, current: Physical) -> f32 {
         let mut speed = target.speed;
         if !target.rudder.is_nan() {
+            // 当前速度越快越允许后轮不吻合
+            let width = current.speed * FRAC_PI_3 + FRAC_PI_6;
+            let diff = (target.rudder - current.rudder).abs();
             speed *=
             // 基于性能的限速：后轮转速有限
-            (target.rudder - current.rudder).cos() *
+            f32::max(0.0,1.0 - diff / width) *
             // 基于现象的限速：转弯不要太快
             ((1.0 - target.rudder.abs() / FRAC_PI_2) * (1.0 - self.angular_attenuation) + self.angular_attenuation);
         }
