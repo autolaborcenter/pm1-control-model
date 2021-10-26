@@ -3,24 +3,22 @@
 use crate::Velocity;
 use nalgebra::{ArrayStorage, Complex, Isometry2, SVector, Translation, Unit, Vector2};
 
-/// 里程计模型
+/// 里程计模型，表示当前机器人位姿
 ///
-/// s：用于显示的总里程
+///     采用两轮差动模型，轨迹为圆弧，给定单步弧长、转角 (s，theta)，累计得到当前位置和姿态 pose
+/// 备注：
 ///
-/// a：用于显示的总转角
-///
-/// pose：  包含位置和角度
-///
-///         用一个SE(2)来表示，即一个2维变换和一个2维旋转组(theta)成
-///         Isometry2<f32> = Isometry<f32, UnitComplex<f32>, 2>
-///                                    R            T
-///                                   旋转         变换
-///                              theta ： a + bi   [x,y]
-///
+///     里程计初始化，可设为默认原点 Odometry::ZERO
+///     里程计增量，借用 Velocity 结构体，给定位移 s 和角度 theta ，得到 delta_Odometry = Odometry::from(Velocity{v:s,w:theta})
+///     累加增量，可直接用 (+=) 运算，即 Odometry += delta_Odometry::from(Velocity)
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Odometry {
+    /// 机器人行驶总里程，单位m
     pub s: f32,
+    /// 机器人行驶总转角，单位rad
     pub a: f32,
+    /// 机器人当前位置及角度，采用刚体变换SE(2)来表示位姿，即一个2维平移和一个2维旋转
     pub pose: Isometry2<f32>,
 }
 
@@ -30,9 +28,11 @@ impl Odometry {
         s: 0.0,
         a: 0.0,
         pose: Isometry2 {
+            //位置
             translation: Translation {
                 vector: SVector::from_array_storage(ArrayStorage([[0.0, 0.0]])),
             },
+            //姿态
             rotation: Unit::new_unchecked(Complex { re: 1.0, im: 0.0 }),
         },
     };
@@ -59,7 +59,7 @@ impl From<Velocity> for Odometry {
     }
 }
 
-///定义里程计（+=）运算，位姿的叠加在SE（2）中用乘法表示
+///定义里程计（+=）运算，需注意位姿的叠加在SE（2）中用乘法表示
 impl std::ops::AddAssign for Odometry {
     fn add_assign(&mut self, rhs: Self) {
         self.s += rhs.s;
@@ -68,7 +68,7 @@ impl std::ops::AddAssign for Odometry {
     }
 }
 
-///定义里程计加法                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+///定义里程计加法                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
 impl std::ops::Add for Odometry {
     type Output = Self;
 
@@ -97,23 +97,42 @@ impl Display for Odometry {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::f32::{consts::PI, EPSILON};
+
+    #[inline]
+    fn pose_equal(a: Isometry2<f32>, b: Isometry2<f32>) -> bool {
+        let mut result = (a.translation.vector[0] - b.translation.vector[0]).abs() <= EPSILON;
+        result = result || (a.translation.vector[1] - b.translation.vector[1]).abs() <= EPSILON;
+        result = result || (a.rotation.angle() - b.rotation.angle()).abs() <= EPSILON;
+        result
+    }
 
     #[test]
     fn odometry_test() {
-        let od = Odometry::ZERO;
+        //测试里程计原点及输出是否正确
+        let mut od = Odometry::ZERO;
         assert_eq!(
             format!("{}", od),
             "Odometry: { s: 0, a: 0, x: 0, y: 0, theta: 0 }"
         );
+        //测试机器人从原点出发，行进一整个圆是否会回到原点
+        let radius = 100.0;
+        let circumference = 2.0 * PI * radius;
+        let step_num = 10.0 as f32;
+        let delta_vel = Velocity {
+            v: (circumference / step_num),
+            w: (PI * 2.0 / step_num),
+        };
+        let delta_od = Odometry::from(delta_vel);
 
-        let v1 = Velocity { v: 0.4, w: 0.3 };
-        let v2 = Velocity { v: 0.6, w: 0.1 };
-        let mut od1 = Odometry::from(v1);
-        let od2 = Odometry::from(v2);
-
-        let od11 = od1 + od2;
-        od1 += od2;
-
-        assert_eq!(format!("{}", od11), format!("{}", od1));
+        for _ in 0..10 {
+            od += delta_od;
+        }
+        assert!(
+            pose_equal(od.pose, Odometry::ZERO.pose),
+            "{} != {}",
+            od.pose,
+            Odometry::ZERO.pose
+        );
     }
 }

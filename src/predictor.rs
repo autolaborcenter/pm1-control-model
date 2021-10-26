@@ -2,20 +2,22 @@
 
 /// 预测器，用于给出下一步控制量的大小
 ///
-/// 结合当前状态和目标状态，以及后轮最大步进量
-/// 给出下一步的最大速度及轮转角。
+///     结合当前状态和目标状态，以及后轮最大步进量，给出下一步的最大速度及轮转角。
 #[derive(Clone)]
 pub struct Predictor {
-    pub rudder_step: f32,     // 后轮最大步进量
-    pub optimizer: Optimizer, // 优化器
-    pub current: Physical,    // 当前状态
-    pub target: Physical,     // 目标状态
+    /// 后轮最大步进量，单位rad
+    pub rudder_step: f32,
+    /// 最大速度优化器    
+    pub optimizer: Optimizer,
+    /// 当前状态
+    pub current: Physical,
+    /// 目标状态  
+    pub target: Physical,
 }
 
-///迭代器，调用Predictor.next()获取下一步（Physical）控制量
 impl Iterator for Predictor {
     type Item = Physical;
-
+    ///获取下一步（Physical）控制量
     fn next(&mut self) -> Option<Self::Item> {
         if self.current != self.target {
             self.current = Physical {

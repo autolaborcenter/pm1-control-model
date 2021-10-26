@@ -5,19 +5,18 @@ use std::{
 };
 
 /// 针对最大速度的优化器
-///
-///     angular_attenuation: 后轮转角对最大速度的影响因子，数值越大，限速越大；
-///     delta_speed 最大加速度
 #[derive(Clone, Copy, Debug)]
 pub struct Optimizer {
+    /// 后轮转角对最大速度的影响因子，数值越大，限速越大；
     angular_attenuation: f32,
+    /// 最大加速度，单位m/s
     delta_speed: f32,
 }
 
 impl Optimizer {
-    /// angular_attenuation：(0-1)
-    /// acceleration:最大加速度，m/s
-    /// period:间隔时间，单位s
+    /// angular_attenuation：(0-1)；
+    /// acceleration:最大加速度，m/s；
+    /// period:间隔时间，单位s；
     pub fn new(angular_attenuation: f32, acceleration: f32, period: Duration) -> Self {
         Self {
             angular_attenuation,
@@ -30,8 +29,9 @@ impl Optimizer {
         let mut speed = target.speed;
         if !target.rudder.is_nan() {
             // 当前速度越快越允许后轮不吻合
-            let width = current.speed * FRAC_PI_3 + FRAC_PI_6; //经验参数，最高速时width = PI/2，此时斜率最小；最低速时，width = PI/6，此时斜率最大；
-            let diff = (target.rudder - current.rudder).abs(); //后轮目标转角到当前转角的差值
+            // 经验参数，最高速时width = PI/2，此时斜率最小；最低速时，width = PI/6，此时斜率最大；
+            let width = current.speed * FRAC_PI_3 + FRAC_PI_6;
+            let diff = (target.rudder - current.rudder).abs();
             speed *=
             // 基于性能的限速：后轮转速有限
             f32::max(0.0,1.0 - diff / width) *
