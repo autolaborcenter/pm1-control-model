@@ -1,20 +1,24 @@
 ﻿use crate::{Physical, Velocity, Wheels};
 
 /// 描述底盘结构并用于转换控制量空间的结构体。
-///
+/// 
 /// 控制量空间一共有三种：
+/// 
 ///     三轮阿卡曼（Physical）模型：最快轮速Speed，后轮转角Rudder
 ///     质点控制（Velocity）模型：线速度V、角速度W
 ///     两轮差动控制（Wheels）模型：左轮轮速LV,右轮轮速RV
 ///
 /// 上位机控制机器人运动采用Physical模型：
+/// 
 ///     利用Physical作为控制量，转换得到左右轮速LV、RV及自身的Rudder三个控制量，发送给底盘
 ///     先用physical_to_velocity(&self, physical: Physical) -> Velocity，得到中间状态
 ///     再利用velocity_to_wheels(&self, velocity: Velocity) -> Wheels，得到LV，RV
-/// 里程计由Wheels模型转换得到Velocity模型    
+/// 里程计由Wheels模型转换得到Velocity模型   
+///  
 ///     利用wheels_to_velocity(&self, wheels: Wheels) -> Velocity，利用Velocity进行预测
 ///
 /// 增设临界角
+/// 
 ///     除了描述结构必要的三个参数之外，此结构体还额外缓存了临界角。
 ///     临界角的目的是控制整车最大速度，避免出现原地转时的速度远大于前进的速度。
 ///     当后轮转角（的绝对值）大于临界角，后轮相对于地面的线速度将大于前轮，

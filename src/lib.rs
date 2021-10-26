@@ -1,3 +1,9 @@
+//! 模块用于控制底盘运动，计算里程计。
+//!
+//! 包括底盘模型(Chassis_model)，里程计模型(Odometery),电机模型(Motor),最大速度优化器(Optimizer),控制量预测器(Preditor)
+//!
+//! 具体内容详见各模块。
+
 mod model;
 mod optimizer;
 
