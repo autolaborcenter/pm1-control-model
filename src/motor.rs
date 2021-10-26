@@ -1,24 +1,30 @@
 ﻿use std::f32::consts::PI;
 /// 电机模型
 ///
-/// 分为两种：驱动轮电机WHEEL；后轮转向电机RUDDER
-///
-///     对于WHEEL来说，车轮转一圈的脉冲数为编码器400线*4倍频*20倍减速机；
-///     对于RUDDER来说，电机转一圈的脉冲数为16384；
+/// 用于转换编码器测到的脉冲数和轮转过的弧度。
 
 pub struct Motor(
-    /// 单位编码器脉冲数对应的角度
+    /// 编码器每脉冲转过的弧度
     pub f32,
 );
 
 impl Motor {
+    /// 驱动轮模型
+    ///
+    /// 脉冲数/圈 = 400 x 4 倍频 x 20 倍减速
     pub const WHEEL: Motor = Motor(2.0 * PI / (4.0 * 400.0 * 20.0));
+
+    /// 舵轮模型
+    ///
+    /// 脉冲数/圈 = 16384
     pub const RUDDER: Motor = Motor(2.0 * PI / 16384.0);
-    ///根据脉冲数换算成轮转角
+
+    /// 脉冲数 -> 弧度
     pub fn pluses_to_rad(&self, pulses: i32) -> f32 {
         (pulses as f32) * self.0
     }
-    ///根据轮转角换算成脉冲数
+
+    /// 弧度 -> 脉冲数
     pub fn rad_to_pulses(&self, rad: f32) -> i32 {
         (rad as f32 / self.0).round() as i32
     }

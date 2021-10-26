@@ -7,17 +7,17 @@
 pub struct Predictor {
     /// 后轮最大步进量，单位rad
     pub rudder_step: f32,
-    /// 最大速度优化器    
+    /// 最大速度优化器
     pub optimizer: Optimizer,
     /// 当前状态
     pub current: Physical,
-    /// 目标状态  
+    /// 目标状态
     pub target: Physical,
 }
 
 impl Iterator for Predictor {
     type Item = Physical;
-    ///获取下一步（Physical）控制量
+    /// 获取下一步（Physical）控制量
     fn next(&mut self) -> Option<Self::Item> {
         if self.current != self.target {
             self.current = Physical {

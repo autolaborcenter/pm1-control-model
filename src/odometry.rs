@@ -5,40 +5,43 @@ use nalgebra::{ArrayStorage, Complex, Isometry2, SVector, Translation, Unit, Vec
 
 /// 里程计模型，表示当前机器人位姿
 ///
-///     采用两轮差动模型，轨迹为圆弧，给定单步弧长、转角 (s，theta)，累计得到当前位置和姿态 pose
+///     采用两轮差动模型，轨迹为圆弧，给定单步弧长、转角 `(s，theta)`，累计得到当前位置和姿态 `pose`
+///
 /// 备注：
 ///
-///     里程计初始化，可设为默认原点 Odometry::ZERO
-///     里程计增量，借用 Velocity 结构体，给定位移 s 和角度 theta ，得到 delta_Odometry = Odometry::from(Velocity{v:s,w:theta})
-///     累加增量，可直接用 (+=) 运算，即 Odometry += delta_Odometry::from(Velocity)
+///     里程计初始化，可设为默认原点 `Odometry::ZERO`
+///     里程计增量，借用 `Velocity` 结构体，给定位移 `s` 和角度 `theta` ，得到 `delta_odometry = Odometry::from(Velocity{v: s, w: theta})`
+///     累加增量，可直接用 `+=` 运算，即 `Odometry += delta_Odometry::from(Velocity)`
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Odometry {
-    /// 机器人行驶总里程，单位m
+    /// 机器人行驶总里程，单位 m
+    ///
+    /// 这个量是单调增的
     pub s: f32,
-    /// 机器人行驶总转角，单位rad
+    /// 机器人行驶总转角，单位 rad
+    ///
+    /// 这个量是单调增的
     pub a: f32,
-    /// 机器人当前位置及角度，采用刚体变换SE(2)来表示位姿，即一个2维平移和一个2维旋转
+    /// 机器人当前位置及角度，采用刚体变换 SE(2) 来表示位姿，即一个 2 维平移和一个 2 维旋转
     pub pose: Isometry2<f32>,
 }
 
-///初始化里程计
 impl Odometry {
+    /// 里程计零，常用于初始化
     pub const ZERO: Self = Self {
         s: 0.0,
         a: 0.0,
         pose: Isometry2 {
-            //位置
             translation: Translation {
                 vector: SVector::from_array_storage(ArrayStorage([[0.0, 0.0]])),
             },
-            //姿态
             rotation: Unit::new_unchecked(Complex { re: 1.0, im: 0.0 }),
         },
     };
 }
 
-///定义里程计从Velocity转成Odometry
+/// 从单位时间内 Velocity 表示的圆轨迹生成里程增量
 impl From<Velocity> for Odometry {
     fn from(vel: Velocity) -> Self {
         let Velocity { v: s, w: theta } = vel;
@@ -59,16 +62,19 @@ impl From<Velocity> for Odometry {
     }
 }
 
-///定义里程计（+=）运算，需注意位姿的叠加在SE（2）中用乘法表示
+/// 重载 `+=`。
 impl std::ops::AddAssign for Odometry {
     fn add_assign(&mut self, rhs: Self) {
         self.s += rhs.s;
         self.a += rhs.a;
+        // 位姿的叠加在 SE(2) 中用乘法表示
         self.pose *= rhs.pose;
     }
 }
 
-///定义里程计加法                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+/// 重载 +。
+///
+/// `self` + `rhs` 即从 `self` 出发再行驶 `rhs`。
 impl std::ops::Add for Odometry {
     type Output = Self;
 
@@ -79,7 +85,6 @@ impl std::ops::Add for Odometry {
     }
 }
 
-///显示里程计信息
 impl Display for Odometry {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
