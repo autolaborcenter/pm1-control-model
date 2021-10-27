@@ -67,4 +67,8 @@ impl Physical {
         speed: 0.0,
         rudder: 0.0,
     };
+
+    pub fn is_released(&self) -> bool {
+        self.rudder.is_nan()
+    }
 }
