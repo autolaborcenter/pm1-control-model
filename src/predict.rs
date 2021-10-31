@@ -7,6 +7,7 @@ use std::time::Duration;
 /// 状态预测器
 ///
 /// 利用给定的机器人参数，根据当前状态和目标状态预测下一周期机器人的状态。
+#[derive(Clone)]
 pub struct StatusPredictor {
     rudder_step: f32, // 后轮最大步进量，单位 rad
     optimizer: Optimizer,
@@ -63,6 +64,7 @@ impl Iterator for StatusPredictor {
 /// 轨迹预测器
 ///
 /// 利用给定的机器人参数，根据当前状态和目标状态预测一个周期中机器人里程的增量
+#[derive(Clone)]
 pub struct TrajectoryPredictor {
     pub period: Duration,           // 控制周期
     pub model: ChassisModel,        // 机器人模型
