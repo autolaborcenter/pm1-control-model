@@ -1,7 +1,6 @@
-﻿use std::fmt::Display;
-
-use crate::Velocity;
+﻿use crate::Velocity;
 use nalgebra::{ArrayStorage, Complex, Isometry2, SVector, Translation, Unit, Vector2};
+use std::fmt::Display;
 
 /// 里程计模型，表示当前机器人位姿
 ///
@@ -89,12 +88,12 @@ impl Display for Odometry {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Odometry: {{ s: {}, a: {}, x: {}, y: {}, theta: {} }}",
+            "Odometry: {{ s: {:.3}, a: {:.1}°, x: {:.3}, y: {:.3}, theta: {:.1}° }}",
             self.s,
-            self.a,
+            self.a.to_degrees(),
             self.pose.translation.vector[0],
             self.pose.translation.vector[1],
-            self.pose.rotation.angle()
+            self.pose.rotation.angle().to_degrees()
         )
     }
 }
@@ -118,7 +117,7 @@ mod tests {
         let mut od = Odometry::ZERO;
         assert_eq!(
             format!("{}", od),
-            "Odometry: { s: 0, a: 0, x: 0, y: 0, theta: 0 }"
+            "Odometry: { s: 0.000, a: 0.0°, x: 0.000, y: 0.000, theta: 0.0° }"
         );
         //测试机器人从原点出发，行进一整个圆是否会回到原点
         let radius = 100.0;

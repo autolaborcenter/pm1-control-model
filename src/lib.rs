@@ -24,10 +24,10 @@ mod motor;
 pub use motor::Motor;
 
 #[cfg(feature = "predict")]
-mod predictor;
+mod predict;
 
 #[cfg(feature = "predict")]
-pub use predictor::Predictor;
+pub use predict::{StatusPredictor, TrajectoryPredictor};
 
 /// 三轮阿卡曼模型
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -58,16 +58,24 @@ pub struct Velocity {
 }
 
 impl Physical {
+    /// 完全静止
     pub const RELEASED: Physical = Physical {
         speed: 0.0,
         rudder: f32::NAN,
     };
 
+    /// 零状态
     pub const ZERO: Physical = Physical {
         speed: 0.0,
         rudder: 0.0,
     };
 
+    /// 静止
+    pub fn is_static(&self) -> bool {
+        self.rudder.is_nan()
+    }
+
+    /// 后轮不受控
     pub fn is_released(&self) -> bool {
         self.rudder.is_nan()
     }
