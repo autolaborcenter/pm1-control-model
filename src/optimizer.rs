@@ -60,3 +60,13 @@ pub(crate) fn step_limited(current: f32, step: f32, target: f32) -> f32 {
         Some(Greater) => f32::min(current + step, target),
     }
 }
+
+#[test]
+fn test_step_limited() {
+    assert_eq!(0.4, step_limited(0.5, 0.1, 0.2)); // 受限
+    assert_eq!(0.6, step_limited(0.5, 0.1, 0.7)); // 受限
+    assert_eq!(0.6, step_limited(0.5, 0.2, 0.6)); // 达标
+    assert_eq!(0.4, step_limited(0.5, 0.2, 0.4)); // 达标
+    assert_eq!(0.5, step_limited(0.5, 0.2, f32::NAN)); // 保持
+    assert!(step_limited(f32::NAN, 0.2, 0.0).is_nan()); // 无效
+}

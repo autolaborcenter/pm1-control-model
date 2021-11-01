@@ -23,7 +23,7 @@ impl StatusPredictor {
         Self {
             rudder_step: period.as_secs_f32(),
             optimizer,
-            current: Physical::RELEASED,
+            current: Physical::ZERO,
             target: Physical::RELEASED,
         }
     }
@@ -58,6 +58,22 @@ impl Iterator for StatusPredictor {
             }
             Some(self.current)
         }
+    }
+}
+
+#[test]
+fn test_status_predictor() {
+    // 打印出来看看
+    const PERIOD: Duration = Duration::from_millis(40);
+    let mut pre = StatusPredictor::new(Optimizer::new(0.5, 1.2, PERIOD), PERIOD);
+    pre.current = Physical {
+        speed: 0.4,
+        rudder: 0.0,
+    };
+    pre.target = Physical::RELEASED;
+    for s in pre {
+        println!("{:?}", s);
+        std::thread::sleep(Duration::from_millis(500));
     }
 }
 

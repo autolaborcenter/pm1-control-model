@@ -72,7 +72,7 @@ impl Physical {
 
     /// 静止
     pub fn is_static(&self) -> bool {
-        self.rudder.is_nan()
+        self.speed == 0.0
     }
 
     /// 后轮不受控
