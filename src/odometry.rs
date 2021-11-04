@@ -4,13 +4,13 @@ use std::fmt::Display;
 
 /// 里程计模型，表示当前机器人位姿
 ///
-///     采用两轮差动模型，轨迹为圆弧，给定单步弧长、转角 `(s，theta)`，累计得到当前位置和姿态 `pose`
+/// 采用两轮差动模型，轨迹为圆弧，给定单步弧长、转角 `(s，theta)`，累计得到当前位置和姿态 `pose`
 ///
-/// 备注：
+/// ## NOTICE
 ///
-///     里程计初始化，可设为默认原点 `Odometry::ZERO`
-///     里程计增量，借用 `Velocity` 结构体，给定位移 `s` 和角度 `theta` ，得到 `delta_odometry = Odometry::from(Velocity{v: s, w: theta})`
-///     累加增量，可直接用 `+=` 运算，即 `Odometry += delta_Odometry::from(Velocity)`
+/// 里程计初始化，可设为默认原点 `Odometry::ZERO`
+/// 里程计增量，借用 `Velocity` 结构体，给定位移 `s` 和角度 `theta` ，得到 `delta_odometry = Odometry::from(Velocity{v: s, w: theta})`
+/// 累加增量，可直接用 `+=` 运算，即 `Odometry += delta_Odometry::from(Velocity)`
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Odometry {

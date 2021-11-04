@@ -2,39 +2,37 @@
 
 /// 描述底盘结构并用于转换控制量空间的结构体。
 ///
-/// 控制量空间一共有三种：
-///     三轮阿卡曼（Physical）模型：最快轮速Speed，后轮转角Rudder
-///     里程计（Velocity）模型：线速度V、角速度W
-///     两轮差动控制（Wheels）模型：左轮轮速LV,右轮轮速RV
+/// 上位机控制机器人运动采用 [`Physical`] 模型：
 ///
-/// 上位机控制机器人运动采用Physical模型：
-///     利用Physical作为控制量，转换得到左右轮速LV、RV及自身的Rudder三个控制量，发送给底盘
-///     先用physical_to_velocity(&self, physical: Physical) -> Velocity，得到中间状态
-///     再利用velocity_to_wheels(&self, velocity: Velocity) -> Wheels，得到LV，RV
+/// 利用 [`Physical`] 作为控制量，转换得到左右轮速 `lv`、`rv` 及自身的 `rudder` 三个控制量，发送给底盘
+/// 先用 `physical_to_velocity(&self, physical: Physical) -> Velocity`，得到中间状态
+/// 再利用 `velocity_to_wheels(&self, velocity: Velocity) -> Wheels`，得到 `lv`，`rv`
 ///
-/// 里程计由Wheels模型转换得到Velocity模型
-///     利用wheels_to_velocity(&self, wheels: Wheels) -> Velocity，利用Velocity进行预测
+/// 里程计由 [`Wheels`] 模型转换得到 [`Velocity`] 模型
+///
+/// 利用 `wheels_to_velocity(&self, wheels: Wheels) -> Velocity`，利用 [`Velocity`] 进行预测
 ///
 /// 增设临界角
-///     除了描述结构必要的三个参数之外，此结构体还额外缓存了临界角。
-///     临界角的目的是控制整车最大速度，避免出现原地转时的速度远大于前进的速度。
-///     当后轮转角（的绝对值）大于临界角，后轮相对于地面的线速度将大于前轮，
-///     此时，[`Physical`] 中 `speed` 表示后轮线速度；
-///     否则，`speed` 表示较快的前轮的线速度。
+///
+/// 除了描述结构必要的三个参数之外，此结构体还额外缓存了临界角。
+/// 临界角的目的是控制整车最大速度，避免出现原地转时的速度远大于前进的速度。
+/// 当后轮转角（的绝对值）大于临界角，后轮相对于地面的线速度将大于前轮，
+/// 此时，[`Physical`] 中 `speed` 表示后轮线速度；
+/// 否则，`speed` 表示较快的前轮的线速度。
 #[derive(Clone)]
 pub struct ChassisModel {
-    /// 左右车轮宽度，单位 m
+    /// 左右车轮宽度 m
     pub width: f32,
-    /// 前后轮距离，单位 m
+    /// 前后轮距离 m
     pub length: f32,
-    /// 车轮半径，单位 m
+    /// 车轮半径 m
     pub wheel: f32,
-    /// 后轮临界角，单位 rad
+    /// 后轮临界角 rad
     critical_rudder: f32,
 }
 
 impl Default for ChassisModel {
-    /// 加载默认底盘数据（PM1底盘）
+    /// 默认底盘数据
     fn default() -> Self {
         Self::new(0.465, 0.355, 0.105)
     }
