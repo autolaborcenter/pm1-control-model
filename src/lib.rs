@@ -6,30 +6,18 @@
 
 mod model;
 mod optimizer;
+mod predict;
 
-pub use model::ChassisModel;
+pub use chassis::*;
+pub use model::PM1;
 pub use optimizer::Optimizer;
-
-#[cfg(feature = "odometry")]
-pub extern crate nalgebra as na;
-
-#[cfg(feature = "odometry")]
-mod odometry;
-
-#[cfg(feature = "odometry")]
-pub use odometry::Odometry;
+pub use predict::Pm1Predictor;
 
 #[cfg(feature = "motor")]
 mod motor;
 
 #[cfg(feature = "motor")]
 pub use motor::Motor;
-
-#[cfg(feature = "predict")]
-mod predict;
-
-#[cfg(feature = "predict")]
-pub use predict::{StatusPredictor, TrajectoryPredictor};
 
 /// 类阿卡曼物理模型
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -49,15 +37,6 @@ pub struct Wheels {
     pub left: f32,
     /// 右轮角速度 rad/s
     pub right: f32,
-}
-
-/// 刚体速度模型
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub struct Velocity {
-    /// 旋转中心相对地面线速度 m/s
-    pub v: f32,
-    /// 旋转中心相对地面角速度 rad/s
-    pub w: f32,
 }
 
 impl Physical {

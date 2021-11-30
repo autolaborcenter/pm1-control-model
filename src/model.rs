@@ -1,4 +1,5 @@
 ﻿use crate::{Physical, Velocity, Wheels};
+use chassis::ChassisModel;
 
 /// 描述底盘结构并用于转换控制量空间的结构体。
 ///
@@ -20,7 +21,7 @@
 /// 此时，[`Physical`] 中 `speed` 表示后轮线速度；
 /// 否则，`speed` 表示较快的前轮的线速度。
 #[derive(Clone)]
-pub struct ChassisModel {
+pub struct PM1 {
     /// 左右车轮宽度 m
     pub width: f32,
     /// 前后轮距离 m
@@ -31,14 +32,22 @@ pub struct ChassisModel {
     critical_rudder: f32,
 }
 
-impl Default for ChassisModel {
+impl Default for PM1 {
     /// 默认底盘数据
     fn default() -> Self {
         Self::new(0.465, 0.355, 0.105)
     }
 }
 
-impl ChassisModel {
+impl ChassisModel for PM1 {
+    type State = Physical;
+
+    fn volocity_from(&self, s: &Self::State) -> Velocity {
+        self.physical_to_velocity(*s)
+    }
+}
+
+impl PM1 {
     /// 新建底盘模型
     pub fn new(width: f32, length: f32, wheel: f32) -> Self {
         Self {
@@ -48,9 +57,7 @@ impl ChassisModel {
             critical_rudder: (length * length / width - width / 2.0).atan2(length),
         }
     }
-}
 
-impl ChassisModel {
     /// 后轮物理模型换算到线、角速度模型
     pub fn physical_to_velocity(&self, physical: Physical) -> Velocity {
         if physical.rudder.is_nan() {
@@ -144,25 +151,6 @@ impl ChassisModel {
     }
 }
 
-#[cfg(feature = "odometry")]
-mod o {
-    use crate::{odometry::Odometry, Physical, Velocity, Wheels};
-
-    impl super::ChassisModel {
-        pub fn velocity_to_odometry(&self, velocity: Velocity) -> Odometry {
-            velocity.into()
-        }
-
-        pub fn wheels_to_odometry(&self, wheels: Wheels) -> Odometry {
-            self.wheels_to_velocity(wheels).into()
-        }
-
-        pub fn physical_to_odometry(&self, physical: Physical) -> Odometry {
-            self.physical_to_velocity(physical).into()
-        }
-    }
-}
-
 #[cfg(test)]
 mod unit {
     use std::f32::consts::FRAC_PI_4;
@@ -176,7 +164,7 @@ mod unit {
 
     #[test]
     fn test_physic_to_chassis() {
-        let model: ChassisModel = ChassisModel::new(0.4, 0.3, 0.1);
+        let model: PM1 = PM1::new(0.4, 0.3, 0.1);
         let physicals = [
             Physical::RELEASED,
             // Physical::ZERO, 只要机器人不移动，统一恢复为 Physical::RELEASED

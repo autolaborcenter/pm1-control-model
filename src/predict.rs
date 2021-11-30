@@ -1,14 +1,15 @@
 ﻿use crate::{
     optimizer::{self, Optimizer},
-    ChassisModel, Odometry, Physical,
+    Physical,
 };
+use chassis::StatusPredictor;
 use std::time::Duration;
 
 /// 状态预测器
 ///
 /// 利用给定的机器人参数，根据当前状态和目标状态预测下一周期机器人的状态。
 #[derive(Clone)]
-pub struct StatusPredictor {
+pub struct Pm1Predictor {
     rudder_step: f32, // 后轮最大步进量，单位 rad
     optimizer: Optimizer,
     /// 当前状态
@@ -17,7 +18,9 @@ pub struct StatusPredictor {
     pub target: Physical,
 }
 
-impl StatusPredictor {
+impl StatusPredictor<Physical> for Pm1Predictor {}
+
+impl Pm1Predictor {
     /// 给定底盘实际使用的优化器和控制周期，生成状态预测器
     pub fn new(optimizer: Optimizer, period: Duration) -> Self {
         Self {
@@ -39,7 +42,7 @@ impl StatusPredictor {
     }
 }
 
-impl Iterator for StatusPredictor {
+impl Iterator for Pm1Predictor {
     type Item = Physical;
 
     /// 预测下一周期以 [`Physical`] 表示的状态
@@ -65,7 +68,7 @@ impl Iterator for StatusPredictor {
 fn test_status_predictor() {
     // 打印出来看看
     const PERIOD: Duration = Duration::from_millis(40);
-    let mut pre = StatusPredictor::new(Optimizer::new(0.5, 1.2, PERIOD), PERIOD);
+    let mut pre = Pm1Predictor::new(Optimizer::new(0.5, 1.2, PERIOD), PERIOD);
     pre.current = Physical {
         speed: 0.4,
         rudder: 0.0,
@@ -74,33 +77,5 @@ fn test_status_predictor() {
     for s in pre {
         println!("{:?}", s);
         std::thread::sleep(Duration::from_millis(500));
-    }
-}
-
-/// 轨迹预测器
-///
-/// 利用给定的机器人参数，根据当前状态和目标状态预测一个周期中机器人里程的增量
-#[derive(Clone)]
-pub struct TrajectoryPredictor {
-    pub period: Duration,           // 控制周期
-    pub model: ChassisModel,        // 机器人模型
-    pub predictor: StatusPredictor, // 状态预测器
-}
-
-impl Iterator for TrajectoryPredictor {
-    type Item = (Duration, Odometry);
-
-    /// 预测下一周期以 [`Duration`] 表示的时间**增量**和以 [`Odometry`] 表示的里程**增量**
-    #[inline]
-    fn next(&mut self) -> Option<Self::Item> {
-        self.predictor.next().map(|Physical { speed, rudder }| {
-            (
-                self.period,
-                self.model.physical_to_odometry(Physical {
-                    speed: speed * self.period.as_secs_f32(),
-                    rudder,
-                }),
-            )
-        })
     }
 }
