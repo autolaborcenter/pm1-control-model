@@ -21,7 +21,7 @@ use chassis::ChassisModel;
 /// 此时，[`Physical`] 中 `speed` 表示后轮线速度；
 /// 否则，`speed` 表示较快的前轮的线速度。
 #[derive(Clone)]
-pub struct PM1 {
+pub struct Pm1Model {
     /// 左右车轮宽度 m
     pub width: f32,
     /// 前后轮距离 m
@@ -32,14 +32,14 @@ pub struct PM1 {
     critical_rudder: f32,
 }
 
-impl Default for PM1 {
+impl Default for Pm1Model {
     /// 默认底盘数据
     fn default() -> Self {
         Self::new(0.465, 0.355, 0.105)
     }
 }
 
-impl ChassisModel for PM1 {
+impl ChassisModel for Pm1Model {
     type State = Physical;
 
     fn volocity_from(&self, s: &Self::State) -> Velocity {
@@ -47,7 +47,7 @@ impl ChassisModel for PM1 {
     }
 }
 
-impl PM1 {
+impl Pm1Model {
     /// 新建底盘模型
     pub fn new(width: f32, length: f32, wheel: f32) -> Self {
         Self {
@@ -164,7 +164,7 @@ mod unit {
 
     #[test]
     fn test_physic_to_chassis() {
-        let model: PM1 = PM1::new(0.4, 0.3, 0.1);
+        let model = Pm1Model::new(0.4, 0.3, 0.1);
         let physicals = [
             Physical::RELEASED,
             // Physical::ZERO, 只要机器人不移动，统一恢复为 Physical::RELEASED

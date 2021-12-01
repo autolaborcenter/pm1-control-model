@@ -9,7 +9,7 @@ mod optimizer;
 mod predict;
 
 pub use chassis::*;
-pub use model::PM1;
+pub use model::Pm1Model;
 pub use optimizer::Optimizer;
 pub use predict::Pm1Predictor;
 

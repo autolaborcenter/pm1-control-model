@@ -1,6 +1,6 @@
 ﻿use crate::{
     optimizer::{self, Optimizer},
-    Physical,
+    Physical, Pm1Model,
 };
 use chassis::StatusPredictor;
 use std::time::Duration;
@@ -18,7 +18,26 @@ pub struct Pm1Predictor {
     pub target: Physical,
 }
 
-impl StatusPredictor<Physical> for Pm1Predictor {}
+impl StatusPredictor for Pm1Predictor {
+    type Model = Pm1Model;
+
+    fn predict(&mut self) -> Option<<Self::Model as chassis::ChassisModel>::State> {
+        // 目标是停住且已经停住
+        if self.target.is_released() && self.current.is_static() {
+            None
+        }
+        // 未达到目标状态
+        else {
+            if self.current != self.target {
+                self.current = Physical {
+                    speed: self.optimize_speed(),
+                    rudder: self.optimize_rudder(),
+                };
+            }
+            Some(self.current)
+        }
+    }
+}
 
 impl Pm1Predictor {
     /// 给定底盘实际使用的优化器和控制周期，生成状态预测器
@@ -42,28 +61,6 @@ impl Pm1Predictor {
     }
 }
 
-impl Iterator for Pm1Predictor {
-    type Item = Physical;
-
-    /// 预测下一周期以 [`Physical`] 表示的状态
-    fn next(&mut self) -> Option<Self::Item> {
-        // 目标是停住且已经停住
-        if self.target.is_released() && self.current.is_static() {
-            None
-        }
-        // 未达到目标状态
-        else {
-            if self.current != self.target {
-                self.current = Physical {
-                    speed: self.optimize_speed(),
-                    rudder: self.optimize_rudder(),
-                };
-            }
-            Some(self.current)
-        }
-    }
-}
-
 #[test]
 fn test_status_predictor() {
     // 打印出来看看
@@ -74,7 +71,7 @@ fn test_status_predictor() {
         rudder: 0.0,
     };
     pre.target = Physical::RELEASED;
-    for s in pre {
+    while let Some(s) = pre.predict() {
         println!("{:?}", s);
         std::thread::sleep(Duration::from_millis(500));
     }
