@@ -41,9 +41,14 @@ impl Default for Pm1Model {
 
 impl ChassisModel for Pm1Model {
     type State = Physical;
+    type Measure = Wheels;
 
-    fn volocity_from(&self, s: &Self::State) -> Velocity {
+    fn drive(&self, s: &Self::State) -> Velocity {
         self.physical_to_velocity(*s)
+    }
+
+    fn measure(&self, m: &Self::Measure) -> Velocity {
+        self.wheels_to_velocity(*m)
     }
 }
 

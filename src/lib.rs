@@ -55,12 +55,35 @@ impl Physical {
     };
 
     /// 静止
+    #[inline]
     pub fn is_static(&self) -> bool {
         self.speed == 0.0
     }
 
     /// 后轮不受控
+    #[inline]
     pub fn is_released(&self) -> bool {
         self.rudder.is_nan()
+    }
+}
+
+impl std::ops::Mul<f32> for Physical {
+    type Output = Self;
+
+    #[inline]
+    fn mul(mut self, rhs: f32) -> Self::Output {
+        self.speed *= rhs;
+        self
+    }
+}
+
+impl std::ops::Mul<f32> for Wheels {
+    type Output = Self;
+
+    #[inline]
+    fn mul(mut self, rhs: f32) -> Self::Output {
+        self.left *= rhs;
+        self.right *= rhs;
+        self
     }
 }
