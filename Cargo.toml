@@ -9,5 +9,5 @@ readme = "README.md"
 chassis = { path = "../chassis" }
 
 [features]
-default = ["motor"]
+default = []
 motor = []
