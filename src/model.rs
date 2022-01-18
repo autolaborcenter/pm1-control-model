@@ -35,7 +35,7 @@ pub struct Pm1Model {
 impl Default for Pm1Model {
     /// 默认底盘数据
     fn default() -> Self {
-        Self::new(0.465, 0.355, 0.105)
+        Self::new(0.460, 0.355, 0.103)
     }
 }
 
